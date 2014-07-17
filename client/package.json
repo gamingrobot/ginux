@@ -1,0 +1,11 @@
+{
+    "dependencies": {
+        "grunt": "*",
+        "grunt-contrib-clean": "*",
+        "grunt-typescript": "*",
+        "load-grunt-tasks": "*",
+        "grunt-contrib-uglify": "*"
+    },
+    "name": "ginux",
+    "version": "0.1.0"
+}

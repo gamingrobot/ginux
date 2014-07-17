@@ -1,0 +1,1 @@
+three.min.js is created by the command 'grunt three' it will combine everything in the folder to do with three.js into one file

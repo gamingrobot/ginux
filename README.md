@@ -1,4 +1,2 @@
 ginux
-=====
-
-Linux Game
+======
