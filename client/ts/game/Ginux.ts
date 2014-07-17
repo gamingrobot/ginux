@@ -1,6 +1,3 @@
-//graphics
-import Skybox = require("game/graphics/Skybox");
-
 //tools
 import RenderContainer = require("tools/RenderContainer");
 import TickProvider = require("tools/TickProvider");
@@ -25,10 +22,10 @@ class Ginux {
         camera.position.set(0,10,-100);
         camera.lookAt(scene.position);
         var renderer = new THREE.WebGLRenderer( {antialias:true} );
-        renderer.autoClear = false; //REQUIRED TO RENDER MULTIPLE SCENES ONTO ONE SCREEN
         renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         var DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
         renderer.setViewport( 0, 0, SCREEN_WIDTH*DPR, SCREEN_HEIGHT*DPR );
+        renderer.setClearColorHex( 0x6495ED, 1 );
         window.container.appendChild( renderer.domElement );
         this._renderContainer =  new RenderContainer(renderer, scene, camera);
         // STATS
@@ -47,10 +44,6 @@ class Ginux {
         this._tickProvider = new TickProvider();
         this._tickProvider.add(stats.update, stats);
         this._tickProvider.add(camControls.update, camControls);
-
-        var skybox = new Skybox(this._renderContainer, skyboxCamera);
-        this._tickProvider.add(skybox.update, skybox);
-        this._tickProvider.add(renderer.clear, renderer, 100); //always clear before rendering stuff
         this._tickProvider.add(this.render, this, 0); //render as the last step
 
     }
