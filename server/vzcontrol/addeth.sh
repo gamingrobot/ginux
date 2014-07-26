@@ -1,3 +1,4 @@
+#!/bin/sh
 CID="$1"
 NETWORKID="$2"
 

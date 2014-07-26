@@ -1,3 +1,4 @@
+#!/bin/sh
 NETWORKID=$1
 
 brctl addbr vzbr$NETWORKID
