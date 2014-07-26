@@ -157,12 +157,12 @@ func main() {
 
 type VZControl struct{}
 
-func (vz *VZControl) CreateContainer(cid int64, reply *int64) error {
+func (vz *VZControl) ContainerCreate(cid int64, reply *int64) error {
 	err_create := createContainer(cid)
 	if err_create != nil {
 		return errors.New(fmt.Sprintf("Create Error: %s", err_create.Error()))
 	}
-	err_mount := setupMounts(cid)
+	err_mount := setupMount(cid)
 	if err_mount != nil {
 		return errors.New(fmt.Sprintf("Mount Error: %s", err_mount.Error()))
 	}
@@ -174,7 +174,7 @@ func (vz *VZControl) CreateContainer(cid int64, reply *int64) error {
 	return nil
 }
 
-func (vz *VZControl) StartConsole(cid int64, reply *int64) error {
+func (vz *VZControl) ConsoleStart(cid int64, reply *int64) error {
 	err := startConsole(cid)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Console Start Error: %s", err.Error()))
@@ -183,7 +183,7 @@ func (vz *VZControl) StartConsole(cid int64, reply *int64) error {
 	return nil
 }
 
-func (vz *VZControl) KillConsole(cid int64, reply *int64) error {
+func (vz *VZControl) ConsoleKill(cid int64, reply *int64) error {
 	err := killConsole(cid)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Console Kill Error: %s", err.Error()))
@@ -192,22 +192,68 @@ func (vz *VZControl) KillConsole(cid int64, reply *int64) error {
 	return nil
 }
 
-func createContainer(id int64) error {
-	create := exec.Command("vzctl", "create", fmt.Sprintf("%d", id), "--config", "ginux")
-	err_create := create.Run() //blocking
-	return err_create
+func (vz *VZControl) NetworkCreate(networkid int64, reply *int64) error {
+	err := addBridge(networkid)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Create Network Error: %s", err.Error()))
+	}
+	reply = &networkid
+	return nil
 }
 
-func setupMounts(id int64) error {
-	cp := exec.Command("cp", "/etc/vz/conf/ginux.mount", fmt.Sprintf("/etc/vz/conf/%d.mount", id))
-	err_cp := cp.Run()
-	return err_cp
+type NetworkAddArgs struct {
+    Id, NetworkId int64
+}
+
+func (vz *VZControl) NetworkAdd(args *NetworkAddArgs, reply *int64) error {
+	cid := args.Id
+	networkid := args.NetworkId
+	err := addInterface(cid, networkid)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Interface Add Error: %s", err.Error()))
+	}
+	err = connectBridge(cid, networkid)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Bridge Connect Error: %s", err.Error()))
+	}
+	reply = &cid
+	return nil
+}
+
+func createContainer(id int64) error {
+	command := exec.Command("vzctl", "create", fmt.Sprintf("%d", id), "--config", "ginux")
+	err := command.Run() //blocking
+	return err
+}
+
+func setupMount(id int64) error {
+	command := exec.Command("cp", "/etc/vz/conf/ginux.mount", fmt.Sprintf("/etc/vz/conf/%d.mount", id))
+	err := command.Run()
+	return err
 }
 
 func startContainer(id int64) error {
-	start := exec.Command("vzctl", "start", fmt.Sprintf("%d", id))
-	err_start := start.Run() //blocking
-	return err_start
+	command := exec.Command("vzctl", "start", fmt.Sprintf("%d", id))
+	err := command.Run() //blocking
+	return err
+}
+
+func addInterface(id int64, networkid int64) error {
+	command := exec.Command("./addeth.sh", fmt.Sprintf("%d", id),  fmt.Sprintf("%d", networkid))
+	err := command.Run()
+	return err
+}
+
+func addBridge(networkid int64) error {
+	command := exec.Command("./addbr.sh", fmt.Sprintf("%d", networkid))
+	err := command.Run()
+	return err
+}
+
+func connectBridge(id int64, networkid int64) error {
+	command := exec.Command("brctl", fmt.Sprintf("vzbr%d", networkid), fmt.Sprintf("veth%d.%d", id, networkid))
+	err := command.Run()
+	return err
 }
 
 func startConsole(id int64) error {

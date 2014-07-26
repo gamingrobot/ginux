@@ -63,25 +63,25 @@ func connectControl() *rpc.Client{
     return client
 }
 
-func (vz *VZControl) CreateContainer(id int64) error {
+func (vz *VZControl) ContainerCreate(id int64) error {
     var reply int64
-    err := vz.rpcClient.Call("VZControl.CreateContainer", id, &reply)
+    err := vz.rpcClient.Call("VZControl.ContainerCreate", id, &reply)
     return err
 }
 
-func (vz *VZControl) StartConsole(id int64) error {
+func (vz *VZControl) ConsoleStart(id int64) error {
     var reply int64
-    err := vz.rpcClient.Call("VZControl.StartConsole", id, &reply)
+    err := vz.rpcClient.Call("VZControl.ConsoleStart", id, &reply)
     return err
 }
 
-func (vz *VZControl) KillConsole(id int64) error {
+func (vz *VZControl) ConsoleKill(id int64) error {
     var reply int64
-    err := vz.rpcClient.Call("VZControl.KillConsole", id, &reply)
+    err := vz.rpcClient.Call("VZControl.ConsoleKill", id, &reply)
     return err
 }
 
-func (vz *VZControl) WriteConsole(id int64, data []byte) error {
+func (vz *VZControl) ConsoleWrite(id int64, data []byte) error {
     chunk := ConsoleChunk{
         Id: id,
         Data: data,
@@ -90,6 +90,22 @@ func (vz *VZControl) WriteConsole(id int64, data []byte) error {
     output := string(str) + "\n"
     vz.consoleConnection.Write([]byte(output))
     return nil
+}
+
+func (vz *VZControl) NetworkCreate(networkid int64) error {
+    var reply int64
+    err := vz.rpcClient.Call("VZControl.NetworkCreate", networkid, &reply)
+    return err
+}
+
+
+func (vz *VZControl) NetworkAdd(id int64, networkid int64) error {
+    type NetworkAddArgs struct {
+        Id, NetworkId int64
+    }
+    var reply int64
+    err := vz.rpcClient.Call("VZControl.NetworkAdd", &NetworkAddArgs{id, networkid}, &reply)
+    return err
 }
 
 

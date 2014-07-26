@@ -8,7 +8,6 @@ import (
     "log"
     "net/http"
     "os"
-    "fmt"
     "sync"
 )
 
@@ -54,36 +53,33 @@ func main() {
     store := sessions.NewCookieStore([]byte(config.Secret))
     m.Use(sessions.Sessions("session", store))
 
-    m.Get("/get", func(session sessions.Session) string {
-        v := session.Get("vm_id")
-        if v == nil {
-            return ""
-        }
-        return fmt.Sprintf("%d", v)
-    })
-
-    m.Get("/create", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
-        //create vm
-        db := GetDB()
-        res, e := db.Exec("INSERT INTO `vms_allocated` (`id`) VALUES (NULL);")
-        if e != nil {
-            return fmt.Sprintf("DB Error: %s", e.Error())
-        }
-        mid, e := res.LastInsertId()
-        if e != nil {
-            return fmt.Sprintf("Error: %s", e.Error())
-        }
-
-        err := vzcontrol.CreateContainer(mid)
+    m.Get("/generate", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
+        err := vzcontrol.ContainerCreate(101)
         if err != nil {
-            return e.Error()
+            return err.Error()
         }
-        session.Set("vm_id", mid)
-        return fmt.Sprintf("%d", mid)
+        err = vzcontrol.ContainerCreate(102)
+        if err != nil {
+            return err.Error()
+        }
+        err = vzcontrol.NetworkCreate(0)
+        if err != nil {
+            return err.Error()
+        }
+        err = vzcontrol.NetworkAdd(101, 0)
+        if err != nil {
+            return err.Error()
+        }
+        err = vzcontrol.NetworkAdd(102, 0)
+        if err != nil {
+            return err.Error()
+        }
+        return "WOOT"
     })
 
     m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
-        ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
+        return  //FOR NOW JUST IGNORE WEBSOCKETS
+        /*ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
         if _, ok := err.(websocket.HandshakeError); ok {
             http.Error(w, "Not a websocket handshake", 400)
             log.Println(err)
@@ -111,7 +107,7 @@ func main() {
         }
         //spawn console
         log.Println(vm_id)
-        err = vzcontrol.StartConsole(vm_id)
+        err = vzcontrol.ConsoleStart(vm_id)
         if err != nil {
             ws.WriteMessage(websocket.TextMessage, []byte(err.Error()))
             return
@@ -119,13 +115,13 @@ func main() {
         for {
             _, message, err := ws.ReadMessage()
             if err != nil {
-                err = vzcontrol.KillConsole(vm_id)
+                err = vzcontrol.ConsoleKill(vm_id)
                 log.Println(err)
                 return
             } else {
-                vzcontrol.WriteConsole(vm_id, message)
+                vzcontrol.ConsoleWrite(vm_id, message)
             }
-        }
+        }*/
     })
     log.Println("Game Server started on", config.Address)
     log.Fatal(http.ListenAndServe(config.Address, m))
