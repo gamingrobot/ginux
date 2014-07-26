@@ -239,13 +239,13 @@ func startContainer(id int64) error {
 }
 
 func addInterface(id int64, networkid int64) error {
-	command := exec.Command("./addeth.sh", fmt.Sprintf("%d", id),  fmt.Sprintf("%d", networkid))
+	command := exec.Command("addeth.sh", fmt.Sprintf("%d", id),  fmt.Sprintf("%d", networkid))
 	err := command.Run()
 	return err
 }
 
 func addBridge(networkid int64) error {
-	command := exec.Command("./addbr.sh", fmt.Sprintf("%d", networkid))
+	command := exec.Command("addbr.sh", fmt.Sprintf("%d", networkid))
 	err := command.Run()
 	return err
 }
