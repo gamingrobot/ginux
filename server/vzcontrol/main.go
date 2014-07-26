@@ -251,7 +251,7 @@ func addBridge(networkid int64) error {
 }
 
 func connectBridge(id int64, networkid int64) error {
-	command := exec.Command("brctl", fmt.Sprintf("vzbr%d", networkid), fmt.Sprintf("veth%d.%d", id, networkid))
+	command := exec.Command("brctl", "addif", fmt.Sprintf("vzbr%d", networkid), fmt.Sprintf("veth%d.%d", id, networkid))
 	err := command.Run()
 	return err
 }
