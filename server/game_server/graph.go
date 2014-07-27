@@ -30,7 +30,7 @@ func (g *Graph) AddEdge(edge Edge) {
 }
 
 func (g *Graph) String() string {
-	return fmt.Sprintf("+%v\n +%v", g.nodes, g.edges)
+	return fmt.Sprintf("%+v\n %+v", g.nodes, g.edges)
 }
 
 type Node struct {
