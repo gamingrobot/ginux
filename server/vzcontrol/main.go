@@ -158,17 +158,17 @@ func main() {
 type VZControl struct{}
 
 func (vz *VZControl) ContainerCreate(cid int64, reply *int64) error {
-	err_create := createContainer(cid)
-	if err_create != nil {
-		return errors.New(fmt.Sprintf("Create Error: %s", err_create.Error()))
+	output, err := createContainer(cid)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Create Error: %s\n Output:%s", err.Error(), output))
 	}
-	err_mount := setupMount(cid)
-	if err_mount != nil {
-		return errors.New(fmt.Sprintf("Mount Error: %s", err_mount.Error()))
+	output, err = setupMount(cid)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Mount Error: %s\n Output:%s", err.Error(), output))
 	}
-	err_start := startContainer(cid)
-	if err_start != nil {
-		return errors.New(fmt.Sprintf("Start Error: %s", err_start.Error()))
+	output, err = startContainer(cid)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Start Error: %s\n Output:%s", err.Error(), output))
 	}
 	reply = &cid
 	return nil
@@ -193,9 +193,9 @@ func (vz *VZControl) ConsoleKill(cid int64, reply *int64) error {
 }
 
 func (vz *VZControl) NetworkCreate(networkid int64, reply *int64) error {
-	err := addBridge(networkid)
+	output, err := addBridge(networkid)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Create Network Error: %s", err.Error()))
+		return errors.New(fmt.Sprintf("Create Network Error: %s\n Output:%s", err.Error(), output))
 	}
 	reply = &networkid
 	return nil
@@ -208,13 +208,13 @@ type NetworkAddArgs struct {
 func (vz *VZControl) NetworkAdd(args *NetworkAddArgs, reply *int64) error {
 	cid := args.Id
 	networkid := args.NetworkId
-	err := addInterface(cid, networkid)
+	output, err := addInterface(cid, networkid)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Interface Add Error: %s", err.Error()))
+		return errors.New(fmt.Sprintf("Interface Add Error: %s\n Output:%s", err.Error(), output))
 	}
-	err = connectBridge(cid, networkid)
+	output, err = connectBridge(cid, networkid)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Bridge Connect Error: %s", err.Error()))
+		return errors.New(fmt.Sprintf("Bridge Connect Error: %s\n Output:%s", err.Error(), output))
 	}
 	reply = &cid
 	return nil
@@ -224,40 +224,40 @@ func (vz *VZControl) Reset(reply *int64) error {
 	return nil
 }
 
-func createContainer(id int64) error {
+func createContainer(id int64) (string, error) {
 	command := exec.Command("vzctl", "create", fmt.Sprintf("%d", id), "--config", "ginux")
-	err := command.Run() //blocking
-	return err
+	output, err := command.CombinedOutput()
+	return string(output), err
 }
 
-func setupMount(id int64) error {
+func setupMount(id int64) (string, error) {
 	command := exec.Command("cp", "/etc/vz/conf/ginux.mount", fmt.Sprintf("/etc/vz/conf/%d.mount", id))
-	err := command.Run()
-	return err
+	output, err := command.CombinedOutput()
+	return string(output), err
 }
 
-func startContainer(id int64) error {
+func startContainer(id int64) (string, error) {
 	command := exec.Command("vzctl", "start", fmt.Sprintf("%d", id))
-	err := command.Run() //blocking
-	return err
+	output, err := command.CombinedOutput()
+	return string(output), err
 }
 
-func addInterface(id int64, networkid int64) error {
+func addInterface(id int64, networkid int64) (string, error)  {
 	command := exec.Command("./addeth.sh", fmt.Sprintf("%d", id),  fmt.Sprintf("%d", networkid))
-	err := command.Run()
-	return err
+	output, err := command.CombinedOutput()
+	return string(output), err
 }
 
-func addBridge(networkid int64) error {
+func addBridge(networkid int64) (string, error) {
 	command := exec.Command("./addbr.sh", fmt.Sprintf("%d", networkid))
-	err := command.Run()
-	return err
+	output, err := command.CombinedOutput()
+	return string(output), err
 }
 
-func connectBridge(id int64, networkid int64) error {
+func connectBridge(id int64, networkid int64) (string, error) {
 	command := exec.Command("brctl", "addif", fmt.Sprintf("vzbr%d", networkid), fmt.Sprintf("veth%d.%d", id, networkid))
-	err := command.Run()
-	return err
+	output, err := command.CombinedOutput()
+	return string(output), err
 }
 
 func startConsole(id int64) error {
