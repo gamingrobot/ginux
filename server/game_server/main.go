@@ -11,6 +11,7 @@ import (
 	"os"
 	"sync"
 	"time"
+    "fmt"
 )
 
 type Config struct {
@@ -94,41 +95,20 @@ func main() {
 				gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id})
                 err = vzcontrol.NetworkCreate(edgeid)
                 if err != nil {
-                    return err.Error()
+                    return fmt.Sprintf("Network Create: %d\n%s", edgeid, err.Error())
                 }
                 err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
                 if err != nil {
-                    return err.Error()
+                    return fmt.Sprintf("Network Add Node: %d, %d\n%s", node.Id, edgeid, err.Error())
                 }
                 err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
                 if err != nil {
-                    return err.Error()
+                    return fmt.Sprintf("Network Add Target: %d, %d\n%s", targetNode.Id, edgeid, err.Error())
                 }
 
 			}
 			steps += 1
 		}
-
-		/*err := vzcontrol.ContainerCreate(101)
-		  if err != nil {
-		      return err.Error()
-		  }
-		  err = vzcontrol.ContainerCreate(102)
-		  if err != nil {
-		      return err.Error()
-		  }
-		  err = vzcontrol.NetworkCreate(0)
-		  if err != nil {
-		      return err.Error()
-		  }
-		  err = vzcontrol.NetworkAdd(101, 0)
-		  if err != nil {
-		      return err.Error()
-		  }
-		  err = vzcontrol.NetworkAdd(102, 0)
-		  if err != nil {
-		      return err.Error()
-		  }*/
 		return gr.String()
 	})
 
