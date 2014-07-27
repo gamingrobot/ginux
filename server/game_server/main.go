@@ -132,7 +132,7 @@ func main() {
 		return gr.String()
 	})
 
-    m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
+    m.Get("/print", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
         return gr.String()
     })
 
