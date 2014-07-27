@@ -6,27 +6,27 @@ type NodeId int
 type EdgeId int
 
 type Graph struct {
-	nodes map[NodeId]*Node
-	edges map[EdgeId]*Edge
+	nodes map[NodeId]Node
+	edges map[EdgeId]Edge
 }
 
 func NewGraph() *Graph {
 	return &Graph{
-		nodes: make(map[NodeId]*Node),
-		edges: make(map[EdgeId]*Edge),
+		nodes: make(map[NodeId]Node),
+		edges: make(map[EdgeId]Edge),
 	}
 }
 
 func (g *Graph) AddNode(node Node) {
-	g.nodes[node.Id] = &node
+	g.nodes[node.Id] = node
 }
 
 func (g *Graph) GetNode(nodeId NodeId) Node {
-	return *g.nodes[nodeId]
+	return g.nodes[nodeId]
 }
 
 func (g *Graph) AddEdge(edge Edge) {
-	g.edges[edge.Id] = &edge
+	g.edges[edge.Id] = edge
 }
 
 func (g *Graph) String() string {
