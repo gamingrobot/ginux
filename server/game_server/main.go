@@ -66,13 +66,13 @@ func main() {
 			return "Already generating"
 		}
 		generating = true
-		maxNodes := 20
-		maxEdges := 10
+		maxNodes := 5
+		maxEdges := 5
 		startNodeId := 101
 
 		startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
-        vzcontrol.ContainerCreate(int64(startNode.Id))
+        err := vzcontrol.ContainerCreate(int64(startNode.Id))
 
 		nodes := make([]Node, 0)
 		nodes = append(nodes, startNode)
@@ -85,13 +85,25 @@ func main() {
 			for i := 1; i <= numEdges; i++ {
 				targetNode := Node{Id: NodeId(i*steps + startNodeId)}
 				gr.AddNode(targetNode)
-                vzcontrol.ContainerCreate(int64(targetNode.Id))
+                err = vzcontrol.ContainerCreate(int64(targetNode.Id))
+                if err != nil {
+                    return err.Error()
+                }
 				nodes = append(nodes, targetNode)
                 edgeid := int64(i*steps)
 				gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id})
-                vzcontrol.NetworkCreate(edgeid)
-                vzcontrol.NetworkAdd(int64(node.Id), edgeid)
-                vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
+                err = vzcontrol.NetworkCreate(edgeid)
+                if err != nil {
+                    return err.Error()
+                }
+                err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
+                if err != nil {
+                    return err.Error()
+                }
+                err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
+                if err != nil {
+                    return err.Error()
+                }
 
 			}
 			steps += 1
@@ -119,6 +131,10 @@ func main() {
 		  }*/
 		return gr.String()
 	})
+
+    m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
+        return gr.String()
+    })
 
 	m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 		return //FOR NOW JUST IGNORE WEBSOCKETS
