@@ -72,6 +72,7 @@ func main() {
 
 		startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
+        vzcontrol.ContainerCreate(int64(startNode.Id))
 
 		nodes := make([]Node, 0)
 		nodes = append(nodes, startNode)
@@ -84,8 +85,14 @@ func main() {
 			for i := 1; i <= numEdges; i++ {
 				targetNode := Node{Id: NodeId(i*steps + startNodeId)}
 				gr.AddNode(targetNode)
+                vzcontrol.ContainerCreate(int64(targetNode.Id))
 				nodes = append(nodes, targetNode)
-				gr.AddEdge(Edge{Id: EdgeId(i * steps), Head: node.Id, Tail: targetNode.Id})
+                edgeid := int64(i*steps)
+				gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id})
+                vzcontrol.NetworkCreate(edgeid)
+                vzcontrol.NetworkAdd(int64(node.Id), edgeid)
+                vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
+
 			}
 			steps += 1
 		}

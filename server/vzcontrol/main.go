@@ -220,6 +220,10 @@ func (vz *VZControl) NetworkAdd(args *NetworkAddArgs, reply *int64) error {
 	return nil
 }
 
+func (vz *VZControl) Reset(reply *int64) error {
+	return nil
+}
+
 func createContainer(id int64) error {
 	command := exec.Command("vzctl", "create", fmt.Sprintf("%d", id), "--config", "ginux")
 	err := command.Run() //blocking
