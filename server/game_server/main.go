@@ -58,7 +58,10 @@ func main() {
 
 	generating := false
 	gr := NewGraph()
-	m.Get("/reset/" + config.Secret, func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
+	m.Get("/reset/:secret", func(w http.ResponseWriter, r *http.Request,params martini.Params, session sessions.Session) string {
+		if params["secret"] != config.Secret {
+			return ""
+		}
 		err := vzcontrol.Reset()
 		if err != nil {
 			return err.Error()
