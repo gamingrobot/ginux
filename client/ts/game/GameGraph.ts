@@ -12,11 +12,11 @@ class GameGraph {
             url : "/graph",
             dataType : 'json',
             context : this,
-            complete : this.loadGraph
+            success : this.loadGraph
         })
     }
 
-    public loadGraph(data) {
+    public loadGraph(data, status, jqXHR) {
         console.log(data)
         for (var key in data.Nodes) {
             this._graph.addNode(new Node(data.Nodes[key].Id))
