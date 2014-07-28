@@ -38,7 +38,7 @@ class GameGraph {
             this.drawEdge(source, target);
         }
         this._gotGraph = true;
-        var layout_options = {width: 2000, height: 2000, iterations: 100000 }
+        var layout_options = {width: 500, height: 500, iterations: 1000 }
         this._layout = new ForceDirected(this._graph, layout_options);
         this._layout.init();
     }
