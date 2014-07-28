@@ -85,25 +85,27 @@ func main() {
 			numEdges := random(1, maxEdges)
 			for i := 1; i <= numEdges; i++ {
 				targetNode := Node{Id: NodeId(i*steps + startNodeId)}
-				gr.AddNode(targetNode)
-                err = vzcontrol.ContainerCreate(int64(targetNode.Id))
-                if err != nil {
-                    return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
-                }
-				nodes = append(nodes, targetNode)
-                edgeid := int64(i*steps)
-				gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id})
-                err = vzcontrol.NetworkCreate(edgeid)
-                if err != nil {
-                    return fmt.Sprintf("Network Create: %d\n%s", edgeid, err.Error())
-                }
-                err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
-                if err != nil {
-                    return fmt.Sprintf("Network Add Node: %d, %d\n%s", node.Id, edgeid, err.Error())
-                }
-                err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
-                if err != nil {
-                    return fmt.Sprintf("Network Add Target: %d, %d\n%s", targetNode.Id, edgeid, err.Error())
+				if gr.AddNode(targetNode) {
+                    err = vzcontrol.ContainerCreate(int64(targetNode.Id))
+                    if err != nil {
+                        return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
+                    }
+    				nodes = append(nodes, targetNode)
+                    edgeid := int64(i*steps)
+    				if gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id}) {
+                        err = vzcontrol.NetworkCreate(edgeid)
+                        if err != nil {
+                            return fmt.Sprintf("Network Create: %d\n%s", edgeid, err.Error())
+                        }
+                        err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
+                        if err != nil {
+                            return fmt.Sprintf("Network Add Node: %d, %d\n%s", node.Id, edgeid, err.Error())
+                        }
+                        err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
+                        if err != nil {
+                            return fmt.Sprintf("Network Add Target: %d, %d\n%s", targetNode.Id, edgeid, err.Error())
+                        }
+                    }
                 }
 
 			}
