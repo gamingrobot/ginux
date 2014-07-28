@@ -43,11 +43,12 @@ class Ginux {
         var axes = new THREE.AxisHelper(100);
         scene.add( axes );
 
-        var graph = new GameGraph()
+        var graph = new GameGraph(this._renderContainer)
 
         this._tickProvider = new TickProvider();
         this._tickProvider.add(stats.update, stats);
         this._tickProvider.add(camControls.update, camControls);
+        this._tickProvider.add(graph.update, graph)
         this._tickProvider.add(this.render, this, 0); //render as the last step
 
     }

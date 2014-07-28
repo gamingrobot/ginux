@@ -4,6 +4,7 @@ Modified typescript version of https://github.com/davidpiegza/Graph-Visualizatio
 class Node {
     public id
     public position
+    public draw_object
     private _nodesTo
     private _nodesFrom
     
