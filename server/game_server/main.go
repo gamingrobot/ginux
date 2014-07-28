@@ -69,7 +69,7 @@ func main() {
 		generating = true
 		maxNodes := 5
 		maxEdges := 5
-		startNodeId := 101
+		startNodeId := 100
 
 		startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
