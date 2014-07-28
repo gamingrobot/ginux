@@ -109,7 +109,7 @@ func (vz *VZControl) NetworkAdd(id int64, networkid int64) error {
 
 func (vz *VZControl) Reset() error {
 	var reply int64
-	err := vz.rpcClient.Call("VZControl.Reset", nil, &reply)
+	err := vz.rpcClient.Call("VZControl.Reset", 1, &reply)
 	return err
 }
 
