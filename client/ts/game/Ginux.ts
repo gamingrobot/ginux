@@ -39,6 +39,10 @@ class Ginux {
         camControls.maxDistance = 5000;
         camControls.noKeys = true;
 
+        //LIGHT
+        var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+        scene.add( light );
+
         // AXIS
         var axes = new THREE.AxisHelper(100);
         scene.add( axes );
