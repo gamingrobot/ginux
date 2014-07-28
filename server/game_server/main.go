@@ -114,7 +114,7 @@ func main() {
 		return gr.String()
 	})
 
-	m.Get("/graph", func(w http.Respons{eWriter, r *http.Request, session sessions.Session) string {
+	m.Get("/graph", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
 		output, err := json.Marshal(gr)
 		if err != nil {
 			return err.Error()
