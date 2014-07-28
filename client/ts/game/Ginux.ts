@@ -5,6 +5,8 @@ import IWindow = require("tools/IWindow");
 declare var window: IWindow;
 
 import Stats = require("stats");
+import GameGraph = require("game/GameGraph");
+
 
 class Ginux {
 
@@ -40,6 +42,8 @@ class Ginux {
         // AXIS
         var axes = new THREE.AxisHelper(100);
         scene.add( axes );
+
+        var graph = new GameGraph()
 
         this._tickProvider = new TickProvider();
         this._tickProvider.add(stats.update, stats);
