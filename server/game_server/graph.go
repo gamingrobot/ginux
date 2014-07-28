@@ -2,46 +2,43 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type NodeId int
 type EdgeId int
 
-func (id NodeId) MarshalJSON() ([]byte, error) {
-    return []byte(fmt.Sprintf("%d", id)), nil
-}
-
 type Graph struct {
-	Nodes map[NodeId]Node
-	Edges map[EdgeId]Edge
+	Nodes map[string]Node
+	Edges map[string]Edge
 }
 
 func NewGraph() *Graph {
 	return &Graph{
-		Nodes: make(map[NodeId]Node),
-		Edges: make(map[EdgeId]Edge),
+		Nodes: make(map[string]Node),
+		Edges: make(map[string]Edge),
 	}
 }
 
 func (g *Graph) AddNode(node Node) bool {
-	if _, exits := g.Nodes[node.Id]; exits {
+	if _, exits := g.Nodes[strconv.Itoa(int(node.Id))]; exits {
 		return false
 	} else {
-		g.Nodes[node.Id] = node
+		g.Nodes[strconv.Itoa(int(node.Id))] = node
 		return true
 	}
 	return false
 }
 
 func (g *Graph) GetNode(nodeId NodeId) Node {
-	return g.Nodes[nodeId]
+	return g.Nodes[strconv.Itoa(int(nodeId))]
 }
 
 func (g *Graph) AddEdge(edge Edge) bool {
-	if _, exits := g.Edges[edge.Id]; exits {
+	if _, exits := g.Edges[strconv.Itoa(int(edge.Id))]; exits {
 		return false
 	} else {
-		g.Edges[edge.Id] = edge
+		g.Edges[strconv.Itoa(int(edge.Id))] = edge
 		return true
 	}
 	return false
