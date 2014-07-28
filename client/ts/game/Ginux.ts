@@ -21,7 +21,7 @@ class Ginux {
         var camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
         var skyboxCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
         scene.add(camera);
-        camera.position.set(0,10,-100);
+        camera.position.set(0,10,-3000);
         camera.lookAt(scene.position);
         var renderer = new THREE.WebGLRenderer( {antialias:true} );
         renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
