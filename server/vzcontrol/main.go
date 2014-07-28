@@ -221,7 +221,17 @@ func (vz *VZControl) NetworkAdd(args *NetworkAddArgs, reply *int64) error {
 }
 
 func (vz *VZControl) Reset(reply *int64) error {
+	output, err := resetSystem()
+	if err != nil {
+		return errors.New(fmt.Sprintf("Reset Error: %s\n Output:%s", err.Error(), output))
+	}
 	return nil
+}
+
+func resetSystem() (string, error) {
+	command := exec.Command("./reset.sh")
+	output, err := command.CombinedOutput()
+	return string(output), err
 }
 
 func createContainer(id int64) (string, error) {

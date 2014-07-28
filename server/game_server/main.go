@@ -56,8 +56,12 @@ func main() {
 	store := sessions.NewCookieStore([]byte(config.Secret))
 	m.Use(sessions.Sessions("session", store))
 
-	m.Get("/reset", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
-		return "No"
+	m.Get("/reset/" + config.Secret, func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
+		err := vzcontrol.Reset()
+		if err != nil {
+			return err.Error()
+		}
+		return "Done"
 	})
 
 	generating := false
