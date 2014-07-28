@@ -88,7 +88,7 @@ func main() {
 				gr.AddNode(targetNode)
                 err = vzcontrol.ContainerCreate(int64(targetNode.Id))
                 if err != nil {
-                    return err.Error()
+                    return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
                 }
 				nodes = append(nodes, targetNode)
                 edgeid := int64(i*steps)
