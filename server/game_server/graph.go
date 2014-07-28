@@ -1,48 +1,50 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type NodeId int
 type EdgeId int
 
 type Graph struct {
-	nodes map[NodeId]Node
-	edges map[EdgeId]Edge
+	Nodes map[NodeId]Node
+	Edges map[EdgeId]Edge
 }
 
 func NewGraph() *Graph {
 	return &Graph{
-		nodes: make(map[NodeId]Node),
-		edges: make(map[EdgeId]Edge),
+		Nodes: make(map[NodeId]Node),
+		Edges: make(map[EdgeId]Edge),
 	}
 }
 
-func (g *Graph) AddNode(node Node) bool{
-	if _, exits := g.nodes[node.Id]; exits {
+func (g *Graph) AddNode(node Node) bool {
+	if _, exits := g.Nodes[node.Id]; exits {
 		return false
 	} else {
-		g.nodes[node.Id] = node
+		g.Nodes[node.Id] = node
 		return true
 	}
 	return false
 }
 
 func (g *Graph) GetNode(nodeId NodeId) Node {
-	return g.nodes[nodeId]
+	return g.Nodes[nodeId]
 }
 
-func (g *Graph) AddEdge(edge Edge) bool{
-	if _, exits := g.edges[edge.Id]; exits {
+func (g *Graph) AddEdge(edge Edge) bool {
+	if _, exits := g.Edges[edge.Id]; exits {
 		return false
 	} else {
-		g.edges[edge.Id] = edge
+		g.Edges[edge.Id] = edge
 		return true
 	}
 	return false
 }
 
 func (g *Graph) String() string {
-	return fmt.Sprintf("%+v\n %+v", g.nodes, g.edges)
+	return fmt.Sprintf("%+v\n %+v", g.Nodes, g.Edges)
 }
 
 type Node struct {

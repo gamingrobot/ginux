@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-martini/martini"
 	"github.com/gorilla/websocket"
 	"github.com/martini-contrib/sessions"
@@ -11,7 +12,6 @@ import (
 	"os"
 	"sync"
 	"time"
-    "fmt"
 )
 
 type Config struct {
@@ -73,7 +73,7 @@ func main() {
 
 		startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
-        err := vzcontrol.ContainerCreate(int64(startNode.Id))
+		err := vzcontrol.ContainerCreate(int64(startNode.Id))
 
 		nodes := make([]Node, 0)
 		nodes = append(nodes, startNode)
@@ -86,27 +86,27 @@ func main() {
 			for i := 1; i <= numEdges; i++ {
 				targetNode := Node{Id: NodeId(i*steps + startNodeId)}
 				if gr.AddNode(targetNode) {
-                    err = vzcontrol.ContainerCreate(int64(targetNode.Id))
-                    if err != nil {
-                        return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
-                    }
-    				nodes = append(nodes, targetNode)
-                    edgeid := int64(i*steps)
-    				if gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id}) {
-                        err = vzcontrol.NetworkCreate(edgeid)
-                        if err != nil {
-                            return fmt.Sprintf("Network Create: %d\n%s", edgeid, err.Error())
-                        }
-                        err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
-                        if err != nil {
-                            return fmt.Sprintf("Network Add Node: %d, %d\n%s", node.Id, edgeid, err.Error())
-                        }
-                        err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
-                        if err != nil {
-                            return fmt.Sprintf("Network Add Target: %d, %d\n%s", targetNode.Id, edgeid, err.Error())
-                        }
-                    }
-                }
+					err = vzcontrol.ContainerCreate(int64(targetNode.Id))
+					if err != nil {
+						return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
+					}
+					nodes = append(nodes, targetNode)
+					edgeid := int64(i * steps)
+					if gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id}) {
+						err = vzcontrol.NetworkCreate(edgeid)
+						if err != nil {
+							return fmt.Sprintf("Network Create: %d\n%s", edgeid, err.Error())
+						}
+						err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
+						if err != nil {
+							return fmt.Sprintf("Network Add Node: %d, %d\n%s", node.Id, edgeid, err.Error())
+						}
+						err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
+						if err != nil {
+							return fmt.Sprintf("Network Add Target: %d, %d\n%s", targetNode.Id, edgeid, err.Error())
+						}
+					}
+				}
 
 			}
 			steps += 1
@@ -114,9 +114,10 @@ func main() {
 		return gr.String()
 	})
 
-    m.Get("/print", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
-        return gr.String()
-    })
+	m.Get("/graph", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
+		json, _ := json.Marshal(gr)
+		return string(json)
+	})
 
 	m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 		return //FOR NOW JUST IGNORE WEBSOCKETS
