@@ -27,7 +27,7 @@ class Ginux {
         renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         var DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
         renderer.setViewport( 0, 0, SCREEN_WIDTH*DPR, SCREEN_HEIGHT*DPR );
-        renderer.setClearColorHex( 0x6495ED, 1 );
+        renderer.setClearColor( 0x6495ED, 1 );
         window.container.appendChild( renderer.domElement );
         this._renderContainer =  new RenderContainer(renderer, scene, camera);
         // STATS
@@ -36,7 +36,7 @@ class Ginux {
         //CAMERA CONTROLS
         var camControls = new THREE.OrbitControls( camera, renderer.domElement, renderer.domElement );
         camControls.minDistance = 20;
-        camControls.maxDistance = 1000;
+        camControls.maxDistance = 5000;
         camControls.noKeys = true;
 
         // AXIS

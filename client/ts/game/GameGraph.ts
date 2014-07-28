@@ -38,15 +38,16 @@ class GameGraph {
             this.drawEdge(source, target);
         }
         this._gotGraph = true;
-        var layout_options = {width: 500, height: 500, iterations: 1000 }
+        //var layout_options = {width: 500, height: 500, iterations: 1000 }
+        var layout_options = {}
         this._layout = new ForceDirected(this._graph, layout_options);
         this._layout.init();
     }
 
     public drawNode(node) {
-        var draw_object = new THREE.Mesh( new THREE.CubeGeometry( 25, 25, 25 ), new THREE.MeshBasicMaterial( {  color: Math.random() * 0xffffff, opacity: 0.5 } ) );
+        var draw_object = new THREE.Mesh( new THREE.SphereGeometry( 50, 50, 50 ), new THREE.MeshBasicMaterial( {  color: Math.random() * 0xffffff, opacity: 0.5 } ) );
 
-        var area = 5000;
+        var area = 500;
         draw_object.position.x = Math.floor(Math.random() * (area + area + 1) - area);
         draw_object.position.y = Math.floor(Math.random() * (area + area + 1) - area);
         draw_object.position.z = Math.floor(Math.random() * (area + area + 1) - area);
