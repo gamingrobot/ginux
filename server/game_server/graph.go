@@ -7,6 +7,10 @@ import (
 type NodeId int
 type EdgeId int
 
+func (id NodeId) MarshalJSON() ([]byte, error) {
+    return []byte(fmt.Sprintf("%d", id)), nil
+}
+
 type Graph struct {
 	Nodes map[NodeId]Node
 	Edges map[EdgeId]Edge
