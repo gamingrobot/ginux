@@ -8,7 +8,12 @@ class GameGraph {
 
     constructor() {
         this._graph = new Graph()
-        $.getJSON( "/graph", this.loadGraph)
+        $.ajax({
+            url : "/graph",
+            dataType : 'json',
+            context : this,
+            complete : this.loadGraph
+        })
     }
 
     public loadGraph(data) {
