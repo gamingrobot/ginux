@@ -56,16 +56,18 @@ func main() {
 	store := sessions.NewCookieStore([]byte(config.Secret))
 	m.Use(sessions.Sessions("session", store))
 
+	generating := false
+	gr := NewGraph()
 	m.Get("/reset/" + config.Secret, func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
 		err := vzcontrol.Reset()
 		if err != nil {
 			return err.Error()
 		}
+		generating = false
+		gr = NewGraph()
 		return "Done"
 	})
 
-	generating := false
-	gr := NewGraph()
 	m.Get("/gen", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
 		if generating {
 			return "Already generating"
