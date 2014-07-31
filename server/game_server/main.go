@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"encoding/binary"
 	"fmt"
 	"github.com/go-martini/martini"
 	"github.com/gorilla/websocket"
@@ -165,7 +166,8 @@ func main() {
 						vzcontrol.ConsoleWrite(int64(currentVm), msgData)
 					}
 				case WSClick:
-					ws.WriteMessage(websocket.TextMessage, msgData)
+					currentVm, _ := binary.Varint(msgData)
+					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%d", currentVm)))
 				}
 			}
 		}
