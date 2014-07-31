@@ -167,7 +167,7 @@ func main() {
 					}
 				case WSClick:
 					currentVm, _ := binary.Varint(msgData)
-					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%d", currentVm)))
+					log.Println(currentVm, msgData)
 				}
 			}
 		}
