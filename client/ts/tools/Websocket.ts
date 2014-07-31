@@ -38,6 +38,7 @@ class Websocket {
         public send(type, data) {
             var en = String.fromCharCode(type);
             en += data;
+            console.log(en);
             this.socket.send(en);
         }
 

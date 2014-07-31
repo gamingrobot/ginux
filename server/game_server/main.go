@@ -167,7 +167,7 @@ func main() {
 					}
 				case WSClick:
 					currentVm, _ := binary.Varint(msgData)
-					log.Println(currentVm, msgData)
+					log.Println(message, currentVm, msgData, string(msgData))
 				}
 			}
 		}
