@@ -22,8 +22,8 @@ type Config struct {
 }
 
 type WebsocketData struct {
-	T string
-	D string
+	Type string `json:"T"` 
+	Data interface{} `json:"D"`
 }
 
 type LockingWebsockets struct {
@@ -161,13 +161,13 @@ func main() {
 				msg := WebsocketData{}
 				json.Unmarshal(message, &msg)
 				log.Println(msg)
-				switch msg.T {
+				switch msg.Type {
 				case "term":
 					if currentVm != 0 {
-						vzcontrol.ConsoleWrite(int64(currentVm), []byte(msg.D))
+						vzcontrol.ConsoleWrite(int64(currentVm), msg.Data.([]byte))
 					}
 				case "click":
-					ws.WriteMessage(websocket.TextMessage, []byte(msg.D))
+					ws.WriteMessage(websocket.TextMessage, msg.Data.([]byte))
 				}
 			}
 		}
