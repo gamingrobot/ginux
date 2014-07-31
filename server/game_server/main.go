@@ -166,7 +166,7 @@ func main() {
 						vzcontrol.ConsoleWrite(int64(currentVm), msgData)
 					}
 				case WSClick:
-					currentVm, _ := strconv.Aoti(string(msgData))
+					currentVm, _ := strconv.Atoi(string(msgData))
 					log.Println(message, currentVm, msgData, string(msgData))
 				}
 			}
