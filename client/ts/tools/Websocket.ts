@@ -33,8 +33,8 @@ class Websocket {
 
         public send(type, data) {
             var en = {
-                "Type": type,
-                "Data": data
+                "T": type,
+                "D": data
             }
             this.socket.send(JSON.stringify(en));
         }

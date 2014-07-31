@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"encoding/binary"
 	"fmt"
 	"github.com/go-martini/martini"
 	"github.com/gorilla/websocket"
@@ -19,6 +20,11 @@ const CLEAR string = "\\33[H\\33[2J"
 type Config struct {
 	Secret  string
 	Address string
+}
+
+type WebsocketData struct {
+	T string
+	D []byte
 }
 
 type LockingWebsockets struct {
@@ -134,6 +140,7 @@ func main() {
 	})
 
 	m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
+		var currentVm int64 = 0
 		ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
 		if _, ok := err.(websocket.HandshakeError); ok {
 			http.Error(w, "Not a websocket handshake", 400)
@@ -151,7 +158,17 @@ func main() {
 				log.Println(err)
 				return
 			} else {
-				ws.WriteMessage(websocket.TextMessage, []byte(message))
+				msg := WebsocketData{}
+				json.Unmarshal(message, &msg)
+				switch msg.T {
+				case "term":
+					if currentVm != 0 {
+						vzcontrol.ConsoleWrite(currentVm, msg.D)
+					}
+				case "click":
+					currentVm, _ = binary.Varint(msg.D)
+					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%d", currentVm)))
+				}
 			}
 		}
 	})
