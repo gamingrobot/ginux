@@ -64,7 +64,7 @@ class GameGraph {
     }
 
     public drawNode(node) {
-        var draw_object = new THREE.Mesh( new THREE.SphereGeometry( 25, 25, 25 ), new THREE.MeshPhongMaterial( {  color: Math.random() * 0xffffff, opacity: 0.5 } ) );
+        var draw_object = new THREE.Mesh( new THREE.SphereGeometry( 25, 25, 25 ), new THREE.MeshBasicMaterial( {  color: Math.random() * 0xffffff, opacity: 0.5 } ) );
 
         var area = 500;
         draw_object.position.x = Math.floor(Math.random() * (area + area + 1) - area);
