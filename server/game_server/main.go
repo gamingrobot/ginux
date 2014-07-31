@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"encoding/binary"
 	"fmt"
 	"github.com/go-martini/martini"
 	"github.com/gorilla/websocket"
@@ -13,6 +12,7 @@ import (
 	"os"
 	"sync"
 	"time"
+	"strconv"
 )
 
 const CLEAR string = "\\33[H\\33[2J"
@@ -166,7 +166,7 @@ func main() {
 						vzcontrol.ConsoleWrite(int64(currentVm), msgData)
 					}
 				case WSClick:
-					currentVm, _ := binary.Varint(msgData)
+					currentVm, _ := strconv.Aoti(string(msgData))
 					log.Println(message, currentVm, msgData, string(msgData))
 				}
 			}
