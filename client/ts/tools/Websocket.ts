@@ -31,8 +31,12 @@ class Websocket {
             this.signal.remove(listener, context);
         }
 
-        public send(data) {
-            this.socket.send(data);
+        public send(type, data) {
+            var en = {
+                "Type": type,
+                "Data": data
+            }
+            this.socket.send(JSON.stringify(en));
         }
 
         private _onmessage = (data) => {

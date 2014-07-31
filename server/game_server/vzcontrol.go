@@ -113,7 +113,6 @@ func (vz *VZControl) Reset() error {
 	return err
 }
 
-
 func (vz *VZControl) Close() {
 	vz.rpcClient.Close()
 }

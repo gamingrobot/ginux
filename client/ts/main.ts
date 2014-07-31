@@ -1,5 +1,4 @@
 import Detector = require("detector");
-import Terminal = require("term");
 import IWindow = require("tools/IWindow");
 declare var window: IWindow;
 

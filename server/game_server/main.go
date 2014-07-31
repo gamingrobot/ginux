@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const CLEAR string = "\\33[H\\33[2J"
+
 type Config struct {
 	Secret  string
 	Address string
@@ -58,7 +60,7 @@ func main() {
 
 	generating := false
 	gr := NewGraph()
-	m.Get("/reset/:secret", func(w http.ResponseWriter, r *http.Request,params martini.Params, session sessions.Session) string {
+	m.Get("/reset/:secret", func(w http.ResponseWriter, r *http.Request, params martini.Params, session sessions.Session) string {
 		if params["secret"] != config.Secret {
 			return ""
 		}
@@ -132,50 +134,26 @@ func main() {
 	})
 
 	m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
-		return //FOR NOW JUST IGNORE WEBSOCKETS
-		/*ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
-		  if _, ok := err.(websocket.HandshakeError); ok {
-		      http.Error(w, "Not a websocket handshake", 400)
-		      log.Println(err)
-		      return
-		  } else if err != nil {
-		      log.Println(err)
-		      return
-		  }
-		  defer ws.Close()
-		  ws.WriteMessage(websocket.TextMessage, []byte("Welcome to ginux!\r\n"))
-		  //get vm numbert
-		  vm_cookie := session.Get("vm_id")
-		  var vm_id int64
-		  if vm_cookie == nil {
-		      ws.WriteMessage(websocket.TextMessage, []byte("Create a node at ginux.gamingrobot.net/create\r\n"))
-		      return
-		  } else {
-		      vm_id = vm_cookie.(int64)
-		  }
-
-		  _, exists := websockets.byId[vm_id];
-		  if !exists{
-		      websockets.addWebsocket(vm_id, ws)
-		      defer websockets.deleteWebsocket(vm_id)
-		  }
-		  //spawn console
-		  log.Println(vm_id)
-		  err = vzcontrol.ConsoleStart(vm_id)
-		  if err != nil {
-		      ws.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-		      return
-		  }
-		  for {
-		      _, message, err := ws.ReadMessage()
-		      if err != nil {
-		          err = vzcontrol.ConsoleKill(vm_id)
-		          log.Println(err)
-		          return
-		      } else {
-		          vzcontrol.ConsoleWrite(vm_id, message)
-		      }
-		  }*/
+		ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
+		if _, ok := err.(websocket.HandshakeError); ok {
+			http.Error(w, "Not a websocket handshake", 400)
+			log.Println(err)
+			return
+		} else if err != nil {
+			log.Println(err)
+			return
+		}
+		defer ws.Close()
+		ws.WriteMessage(websocket.TextMessage, []byte("Welcome to ginux!\r\n"))
+		for {
+			_, message, err := ws.ReadMessage()
+			if err != nil {
+				log.Println(err)
+				return
+			} else {
+				ws.WriteMessage(websocket.TextMessage, []byte(message))
+			}
+		}
 	})
 	log.Println("Game Server started on", config.Address)
 	log.Fatal(http.ListenAndServe(config.Address, m))

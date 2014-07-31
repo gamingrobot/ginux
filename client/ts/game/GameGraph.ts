@@ -11,11 +11,13 @@ class GameGraph {
     private _layout;
     private _render = null;
     private _objectSelection = null;
+    private _websocket = null;
 
-    constructor(render) {
+    constructor(render, websocket) {
         this._graph = new Graph()
         this._geometries = [];
         this._render = render
+        this._websocket = websocket;
         $.ajax({
             url : "/graph",
             dataType : 'json',
@@ -32,15 +34,15 @@ class GameGraph {
     private _onselected = (obj) => {
         if(obj != null) {
             console.log("Selected:", obj.id)
-        } else {
         }
     }
 
     private _onclicked = (obj) => {
         if(obj != null) {
             console.log("Clicked:", obj.id)
-        } else {
-        }    }
+            this._websocket.send("clicked", obj.id)
+        }  
+    }
 
     public loadGraph(data, status, jqXHR) {
         console.log(data);

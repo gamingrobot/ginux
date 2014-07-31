@@ -1,6 +1,7 @@
 //tools
 import RenderContainer = require("tools/RenderContainer");
 import TickProvider = require("tools/TickProvider");
+import Websocket = require("tools/Websocket");
 import Terminal = require("term");
 import IWindow = require("tools/IWindow");
 declare var window: IWindow;
@@ -13,6 +14,7 @@ class Ginux {
 
     private _tickProvider: TickProvider = null;
     private _renderContainer: RenderContainer = null;
+    private _terminal = null;
 
     public initialise():void {
         var scene = new THREE.Scene();
@@ -48,22 +50,23 @@ class Ginux {
         var axes = new THREE.AxisHelper(100);
         scene.add( axes );
 
-        var graph = new GameGraph(this._renderContainer);
+        //WEBSOCKET
+        var websocket = new Websocket();
+        websocket.connect();
 
+        var graph = new GameGraph(this._renderContainer, websocket);
 
         //TERMINAL
-        var term = new Terminal({
+        this._terminal = new Terminal({
             cols: 70,
             rows: Math.floor(window.innerHeight / 12),
             screenKeys: true
         });
-        term.open(document.getElementById("term"));
-        /*term.on('data', function (data) {
-            websocket.send(data);
-        });  
-        websocket.onmessage = function (msg) {
-            term.write(msg.data);
-        };*/     
+        this._terminal.open(document.getElementById("term"));
+        this._terminal.on('data', function (data) {
+            websocket.send("term", data);
+        });
+        websocket.add(this.websocketData, this)
 
         this._tickProvider = new TickProvider();
         this._tickProvider.add(stats.update, stats);
@@ -71,6 +74,10 @@ class Ginux {
         this._tickProvider.add(graph.update, graph)
         this._tickProvider.add(this.render, this, 0); //render as the last step
 
+    }
+
+    public websocketData(msg){
+        this._terminal.write(msg.data);
     }
 
     public render():void {

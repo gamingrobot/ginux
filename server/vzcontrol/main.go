@@ -202,7 +202,7 @@ func (vz *VZControl) NetworkCreate(networkid int64, reply *int64) error {
 }
 
 type NetworkAddArgs struct {
-    Id, NetworkId int64
+	Id, NetworkId int64
 }
 
 func (vz *VZControl) NetworkAdd(args *NetworkAddArgs, reply *int64) error {
@@ -252,8 +252,8 @@ func startContainer(id int64) (string, error) {
 	return string(output), err
 }
 
-func addInterface(id int64, networkid int64) (string, error)  {
-	command := exec.Command("./addeth.sh", fmt.Sprintf("%d", id),  fmt.Sprintf("%d", networkid))
+func addInterface(id int64, networkid int64) (string, error) {
+	command := exec.Command("./addeth.sh", fmt.Sprintf("%d", id), fmt.Sprintf("%d", networkid))
 	output, err := command.CombinedOutput()
 	return string(output), err
 }
