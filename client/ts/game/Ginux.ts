@@ -64,7 +64,7 @@ class Ginux {
         });
         this._terminal.open(document.getElementById("term"));
         this._terminal.on('data', function (data) {
-            websocket.send("term", data);
+            websocket.send(websocket.types.Term, data);
         });
         websocket.add(this.websocketData, this)
 

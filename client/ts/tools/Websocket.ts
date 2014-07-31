@@ -7,6 +7,10 @@ class Websocket {
 
         signal = new Signal();
         socket = null;
+        types = {
+            Term: 1,
+            Click: 2
+        }
 
         constructor() {
         }
@@ -32,11 +36,9 @@ class Websocket {
         }
 
         public send(type, data) {
-            var en = {
-                "T": type,
-                "D": data
-            }
-            this.socket.send(JSON.stringify(en));
+            var en = String.fromCharCode(type);
+            en += data;
+            this.socket.send(en);
         }
 
         private _onmessage = (data) => {

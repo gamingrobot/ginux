@@ -40,7 +40,7 @@ class GameGraph {
     private _onclicked = (obj) => {
         if(obj != null) {
             console.log("Clicked:", obj.id)
-            this._websocket.send("click", obj.id)
+            this._websocket.send(this._websocket.types.Click, obj.id)
         }  
     }
 

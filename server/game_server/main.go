@@ -16,14 +16,14 @@ import (
 
 const CLEAR string = "\\33[H\\33[2J"
 
+const (
+	WSTerm = 1
+	WSClick = 2
+)
+
 type Config struct {
 	Secret  string
 	Address string
-}
-
-type WebsocketData struct {
-	Type string `json:"T"` 
-	Data interface{} `json:"D"`
 }
 
 type LockingWebsockets struct {
@@ -157,17 +157,15 @@ func main() {
 				log.Println(err)
 				return
 			} else {
-				log.Println(string(message))
-				msg := WebsocketData{}
-				json.Unmarshal(message, &msg)
-				log.Println(msg)
-				switch msg.Type {
-				case "term":
+				msgType := message[0]
+				msgData := message[1:len(message)]
+				switch msgType {
+				case WSTerm:
 					if currentVm != 0 {
-						vzcontrol.ConsoleWrite(int64(currentVm), msg.Data.([]byte))
+						vzcontrol.ConsoleWrite(int64(currentVm), msgData)
 					}
-				case "click":
-					ws.WriteMessage(websocket.TextMessage, msg.Data.([]byte))
+				case WSClick:
+					ws.WriteMessage(websocket.TextMessage, msgData)
 				}
 			}
 		}
