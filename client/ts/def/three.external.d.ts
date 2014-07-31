@@ -36,4 +36,8 @@ declare module THREE {
         getAutoRotationAngle(): number;
         getZoomScale(): number;
     }
+    export class ObjectSelection {
+        constructor(parameters: any);
+        render(scene: any, camera:any);
+    }
 }

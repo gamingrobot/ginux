@@ -43,33 +43,4 @@ window.cancelRequestAnimFrame = (function () {
         clearTimeout
 })();
 
-//each character is 10px tall * 1.2 line-height, 7px wide
-console.log(Math.floor(window.innerHeight / 12));
-console.log(window.innerHeight);
-var term = new Terminal({
-    cols: 70,
-    rows: Math.floor(window.innerHeight / 12),
-    screenKeys: true
-});
-term.open(document.getElementById("term"));
-var server = "ws://" + document.location.host + "/ws";
-var websocket = new WebSocket(server);
-websocket.onopen = function () {
-    websocket.onmessage = function (msg) {
-        term.write(msg.data);
-    };
-
-    term.on('data', function (data) {
-        websocket.send(data);
-    });
-};
-websocket.onclose = function () {
-    console.log(term.x, term.y);
-    $('#error').empty().append("Lost Connection to WebSocket");
-    $('#error').show();
-};
-websocket.onerror = function (err) {
-    $('#error').empty().append("Error: " + err);
-};
-
 export = Main;

@@ -10,6 +10,7 @@ class GameGraph {
     private _geometries;
     private _layout;
     private _render = null;
+    private _objectSelection = null;
 
     constructor(render) {
         this._graph = new Graph()
@@ -20,8 +21,26 @@ class GameGraph {
             dataType : 'json',
             context : this,
             success : this.loadGraph
-        })
+        });
+        this._objectSelection = new THREE.ObjectSelection({
+            domElement: this._render.domElement,
+            selected: this._onselected,
+            clicked: this._onclicked,
+        });
     }
+
+    private _onselected = (obj) => {
+        if(obj != null) {
+            console.log("Selected:", obj.id)
+        } else {
+        }
+    }
+
+    private _onclicked = (obj) => {
+        if(obj != null) {
+            console.log("Clicked:", obj.id)
+        } else {
+        }    }
 
     public loadGraph(data, status, jqXHR) {
         console.log(data);
@@ -77,6 +96,7 @@ class GameGraph {
         if(!this._gotGraph){
             return
         }
+        this._objectSelection.render(this._render.scene, this._render.camera);
         // Generate layout if not finished
         if(!this._layout.finished) {
             this._layout.generate();

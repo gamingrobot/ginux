@@ -1,6 +1,7 @@
 //tools
 import RenderContainer = require("tools/RenderContainer");
 import TickProvider = require("tools/TickProvider");
+import Terminal = require("term");
 import IWindow = require("tools/IWindow");
 declare var window: IWindow;
 
@@ -47,7 +48,22 @@ class Ginux {
         var axes = new THREE.AxisHelper(100);
         scene.add( axes );
 
-        var graph = new GameGraph(this._renderContainer)
+        var graph = new GameGraph(this._renderContainer);
+
+
+        //TERMINAL
+        var term = new Terminal({
+            cols: 70,
+            rows: Math.floor(window.innerHeight / 12),
+            screenKeys: true
+        });
+        term.open(document.getElementById("term"));
+        /*term.on('data', function (data) {
+            websocket.send(data);
+        });  
+        websocket.onmessage = function (msg) {
+            term.write(msg.data);
+        };*/     
 
         this._tickProvider = new TickProvider();
         this._tickProvider.add(stats.update, stats);
