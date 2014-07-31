@@ -166,8 +166,7 @@ func main() {
 						vzcontrol.ConsoleWrite(int64(currentVm), msg.D)
 					}
 				case "click":
-					currentVm, _ = strconv.Atoi(string(msg.D))
-					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%d", currentVm)))
+					ws.WriteMessage(websocket.TextMessage, msg.D)
 				}
 			}
 		}
