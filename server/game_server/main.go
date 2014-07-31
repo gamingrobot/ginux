@@ -28,27 +28,34 @@ type Config struct {
 }
 
 type LockingWebsockets struct {
-	mutex sync.RWMutex
+	sync.RWMutex
 	byId  map[int64]*websocket.Conn
+	consoleToId  map[int64][]int64
+	currentId int64
 }
 
 var websockets *LockingWebsockets
 
 func (c *LockingWebsockets) deleteWebsocket(id int64) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	delete(c.byId, id)
 }
 
-func (c *LockingWebsockets) addWebsocket(id int64, ws *websocket.Conn) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.byId[id] = ws
+func (c *LockingWebsockets) addWebsocket(ws *websocket.Conn) int64 {
+	c.Lock()
+	defer c.Unlock()
+	c.currentId += 1
+	retid := c.currentId
+	c.byId[retid] = ws
+	return retid
 }
 
 func main() {
 	websockets = &LockingWebsockets{
 		byId: make(map[int64]*websocket.Conn),
+		consoleToId: make(map[int64][]int64),
+		currentId: 0,
 	}
 	consoleReadChannel = make(chan ConsoleChunk)
 	go consoleDispatch()
@@ -140,7 +147,7 @@ func main() {
 	})
 
 	m.Get("/ws", func(w http.ResponseWriter, r *http.Request, session sessions.Session) {
-		currentVm := 0
+		var currentVm int64 = -1
 		ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
 		if _, ok := err.(websocket.HandshakeError); ok {
 			http.Error(w, "Not a websocket handshake", 400)
@@ -151,6 +158,8 @@ func main() {
 			return
 		}
 		defer ws.Close()
+		websocketId := websockets.addWebsocket(ws)
+ 		defer websockets.deleteWebsocket(websocketId)
 		ws.WriteMessage(websocket.TextMessage, []byte("Welcome to ginux!\r\n"))
 		for {
 			_, message, err := ws.ReadMessage()
@@ -162,12 +171,23 @@ func main() {
 				msgData := message[1:len(message)]
 				switch msgType {
 				case WSTerm:
-					if currentVm != 0 {
-						vzcontrol.ConsoleWrite(int64(currentVm), msgData)
+					if currentVm != -1 {
+						vzcontrol.ConsoleWrite(currentVm, msgData)
 					}
 				case WSClick:
-					currentVm, _ := strconv.Atoi(string(msgData))
-					log.Println(message, currentVm, msgData, string(msgData))
+					prevVm := currentVm
+					tmp, _ := strconv.Atoi(string(msgData))
+					currentVm = int64(tmp)
+					websockets.Lock()
+					if prevVm != -1 {
+						for index, wsId := range websockets.consoleToId[prevVm] {
+							if wsId == websocketId{
+								websockets.consoleToId[prevVm] = append(websockets.consoleToId[prevVm][:index], websockets.consoleToId[prevVm][index+1:]...)
+							}
+						}
+					}
+					websockets.consoleToId[currentVm] = append(websockets.consoleToId[currentVm], websocketId)
+					websockets.Unlock()
 				}
 			}
 		}
@@ -183,10 +203,12 @@ func random(min, max int) int {
 
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
-		websockets.mutex.RLock()
-		if socket, ok := websockets.byId[chunk.Id]; ok {
-			socket.WriteMessage(websocket.TextMessage, chunk.Data)
+		websockets.RLock()
+		for _, wsId := range websockets.consoleToId[chunk.Id]{
+			if socket, ok := websockets.byId[wsId]; ok {
+				socket.WriteMessage(websocket.TextMessage, chunk.Data)
+			}
 		}
-		websockets.mutex.RUnlock()
+		websockets.RUnlock()
 	}
 }
