@@ -158,8 +158,10 @@ func main() {
 				log.Println(err)
 				return
 			} else {
+				log.Println(message)
 				msg := WebsocketData{}
 				json.Unmarshal(message, &msg)
+				log.Println(msg)
 				switch msg.T {
 				case "term":
 					if currentVm != 0 {
