@@ -10,15 +10,15 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
-	"strconv"
 )
 
 const CLEAR string = "\\33[H\\33[2J"
 
 const (
-	WSTerm = 1
+	WSTerm  = 1
 	WSClick = 2
 )
 
@@ -29,9 +29,9 @@ type Config struct {
 
 type LockingWebsockets struct {
 	sync.RWMutex
-	byId  map[int64]*websocket.Conn
-	consoleToId  map[int64][]int64
-	currentId int64
+	byId        map[int64]*websocket.Conn
+	consoleToId map[int64][]int64
+	currentId   int64
 }
 
 var websockets *LockingWebsockets
@@ -53,9 +53,9 @@ func (c *LockingWebsockets) addWebsocket(ws *websocket.Conn) int64 {
 
 func main() {
 	websockets = &LockingWebsockets{
-		byId: make(map[int64]*websocket.Conn),
+		byId:        make(map[int64]*websocket.Conn),
 		consoleToId: make(map[int64][]int64),
-		currentId: 0,
+		currentId:   0,
 	}
 	consoleReadChannel = make(chan ConsoleChunk)
 	go consoleDispatch()
@@ -98,6 +98,7 @@ func main() {
 		startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
 		err := vzcontrol.ContainerCreate(int64(startNode.Id))
+		err = vzcontrol.ConsoleStart(int64(startNode.Id))
 
 		nodes := make([]Node, 0)
 		nodes = append(nodes, startNode)
@@ -113,6 +114,10 @@ func main() {
 					err = vzcontrol.ContainerCreate(int64(targetNode.Id))
 					if err != nil {
 						return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
+					}
+					err = vzcontrol.ConsoleStart(int64(targetNode.Id))
+					if err != nil {
+						return fmt.Sprintf("Console Start: %d\n%s", targetNode.Id, err.Error())
 					}
 					nodes = append(nodes, targetNode)
 					edgeid := int64(i * steps)
@@ -159,7 +164,7 @@ func main() {
 		}
 		defer ws.Close()
 		websocketId := websockets.addWebsocket(ws)
- 		defer websockets.deleteWebsocket(websocketId)
+		defer websockets.deleteWebsocket(websocketId)
 		ws.WriteMessage(websocket.TextMessage, []byte("Welcome to ginux!\r\n"))
 		for {
 			_, message, err := ws.ReadMessage()
@@ -181,7 +186,7 @@ func main() {
 					websockets.Lock()
 					if prevVm != -1 {
 						for index, wsId := range websockets.consoleToId[prevVm] {
-							if wsId == websocketId{
+							if wsId == websocketId {
 								websockets.consoleToId[prevVm] = append(websockets.consoleToId[prevVm][:index], websockets.consoleToId[prevVm][index+1:]...)
 							}
 						}
@@ -204,7 +209,7 @@ func random(min, max int) int {
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
 		websockets.RLock()
-		for _, wsId := range websockets.consoleToId[chunk.Id]{
+		for _, wsId := range websockets.consoleToId[chunk.Id] {
 			if socket, ok := websockets.byId[wsId]; ok {
 				socket.WriteMessage(websocket.TextMessage, chunk.Data)
 			}
