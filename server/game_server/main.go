@@ -193,6 +193,7 @@ func main() {
 					}
 					websockets.consoleToId[currentVm] = append(websockets.consoleToId[currentVm], websocketId)
 					websockets.Unlock()
+					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("r\nSelected Container %d\r\n", currentVm)))
 				}
 			}
 		}
