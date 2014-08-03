@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const CLEAR string = "\\33[H\\33[2J"
+const CLEAR string = "\033[H\033[2J"
 
 const (
 	WSTerm  = 1
