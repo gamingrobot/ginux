@@ -16,7 +16,6 @@ import (
 )
 
 const CLEAR string = "\033[H\033[2J"
-const RESET string = "\033[44m\033[1M\033[0m"
 
 const MAX_CONSOLE int = 10000
 
@@ -200,7 +199,6 @@ func main() {
 					websockets.consoleToId[currentVm] = append(websockets.consoleToId[currentVm], websocketId)
 					websockets.Unlock()
 					ws.WriteMessage(websocket.TextMessage, []byte(CLEAR))
-					ws.WriteMessage(websocket.TextMessage, []byte(RESET))
 					//ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Selected Container %d\r\n", currentVm)))
 					ws.WriteMessage(websocket.TextMessage, []byte(consoleBuffers[currentVm]))
 				}
