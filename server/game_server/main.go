@@ -17,6 +17,8 @@ import (
 
 const CLEAR string = "\033[H\033[2J"
 
+const MAX_CONSOLE int = 10000
+
 const (
 	WSTerm  = 1
 	WSClick = 2
@@ -214,7 +216,7 @@ func random(min, max int) int {
 
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
-		if len(consoleBuffers[chunk.Id]) > 2048 { 
+		if len(consoleBuffers[chunk.Id]) > MAX_CONSOLE { 
 			consoleBuffers[chunk.Id] = consoleBuffers[chunk.Id][len(string(chunk.Data)):] + string(chunk.Data)
 		} else {
 			consoleBuffers[chunk.Id] += string(chunk.Data)
