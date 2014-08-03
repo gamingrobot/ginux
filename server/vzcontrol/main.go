@@ -225,6 +225,13 @@ func (vz *VZControl) Reset(someid int64, reply *int64) error {
 	if err != nil {
 		return errors.New(fmt.Sprintf("Reset Error: %s\n Output:%s", err.Error(), output))
 	}
+	consoles.mutex.RLock()
+	consolesCopy := consoles.byId
+	consoles.mutex.RUnlock()
+
+	for cid, _ := range consolesCopy {
+		killConsole(cid)
+	}
 	return nil
 }
 
