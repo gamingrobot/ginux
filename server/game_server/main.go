@@ -214,7 +214,11 @@ func random(min, max int) int {
 
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
-		consoleBuffers[chunk.Id] = consoleBuffers[chunk.Id][len(string(chunk.Data)):] + string(chunk.Data)
+		if len(consoleBuffers[chunk.Id]) > 2048 { 
+			consoleBuffers[chunk.Id] = consoleBuffers[chunk.Id][len(string(chunk.Data)):] + string(chunk.Data)
+		} else {
+			consoleBuffers[chunk.Id] += string(chunk.Data)
+		}
 		websockets.RLock()
 		for _, wsId := range websockets.consoleToId[chunk.Id] {
 			if socket, ok := websockets.byId[wsId]; ok {
