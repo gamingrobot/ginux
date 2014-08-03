@@ -78,6 +78,7 @@ class Ginux {
 
     public websocketData(msg){
         this._terminal.write(msg.data);
+        console.log(msg.data);
     }
 
     public render():void {
