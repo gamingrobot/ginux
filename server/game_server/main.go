@@ -16,7 +16,7 @@ import (
 )
 
 const CLEAR string = "\033[H\033[2J"
-const RESET string = "\033[3g"
+const RESET string = "\033[44m\033[1M\033[0m"
 
 const MAX_CONSOLE int = 10000
 
