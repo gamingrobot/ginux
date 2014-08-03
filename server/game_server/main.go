@@ -34,6 +34,8 @@ type LockingWebsockets struct {
 	currentId   int64
 }
 
+var consoleBuffers map[int64]string
+
 var websockets *LockingWebsockets
 
 func (c *LockingWebsockets) deleteWebsocket(id int64) {
@@ -52,6 +54,7 @@ func (c *LockingWebsockets) addWebsocket(ws *websocket.Conn) int64 {
 }
 
 func main() {
+	consoleBuffers = make(map[int64]string)
 	websockets = &LockingWebsockets{
 		byId:        make(map[int64]*websocket.Conn),
 		consoleToId: make(map[int64][]int64),
@@ -193,7 +196,9 @@ func main() {
 					}
 					websockets.consoleToId[currentVm] = append(websockets.consoleToId[currentVm], websocketId)
 					websockets.Unlock()
-					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("\r\nSelected Container %d\r\n", currentVm)))
+					ws.WriteMessage(websocket.TextMessage, []byte(CLEAR))
+					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Selected Container %d\r\n", currentVm)))
+					ws.WriteMessage(websocket.TextMessage, []byte(consoleBuffers[currentVm]))
 				}
 			}
 		}
@@ -209,6 +214,7 @@ func random(min, max int) int {
 
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
+		consoleBuffers[chunk.Id] = consoleBuffers[chunk.Id][len(string(chunk.Data)):] + string(chunk.Data)
 		websockets.RLock()
 		for _, wsId := range websockets.consoleToId[chunk.Id] {
 			if socket, ok := websockets.byId[wsId]; ok {
