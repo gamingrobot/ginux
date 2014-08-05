@@ -201,7 +201,7 @@ func main() {
 					websockets.Unlock()
 					//ws.WriteMessage(websocket.TextMessage, []byte(CLEAR))
 					ws.WriteMessage(websocket.TextMessage, []byte(RESET))
-					//ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Selected Container %d\r\n", currentVm)))
+					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Selected Container %d\r\n", currentVm)))
 					ws.WriteMessage(websocket.TextMessage, []byte(consoleBuffers[currentVm]))
 				}
 			}
