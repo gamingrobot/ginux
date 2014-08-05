@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"runtime/pprof"
 )
 
 const CLEAR string = "\033[H\033[2J"
@@ -57,6 +58,16 @@ func (c *LockingWebsockets) addWebsocket(ws *websocket.Conn) int64 {
 }
 
 func main() {
+	f, err := os.Create("pprof.out")
+	if err != nil {
+		log.Fatal(err)
+	}
+	pprof.StartCPUProfile(f)
+	go func() {
+		time.Sleep(time.Minute * 30)
+		pprof.StopCPUProfile()
+		log.Fatal("Done")
+	}()
 	consoleBuffers = make(map[int64]string)
 	websockets = &LockingWebsockets{
 		byId:        make(map[int64]*websocket.Conn),
