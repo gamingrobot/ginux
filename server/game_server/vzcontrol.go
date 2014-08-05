@@ -15,7 +15,7 @@ type VZControl struct {
 	consoleConnection net.Conn
 }
 
-var consoleReadChannel chan ConsoleChunk
+var consoleReadChannel chan *ConsoleChunk
 
 func ConnectVZControl() *VZControl {
 	console := connectConsole()
@@ -51,7 +51,7 @@ func consoleReader(r io.Reader) {
 		}
 		var chunk ConsoleChunk
 		json.Unmarshal([]byte(str), &chunk)
-		consoleReadChannel <- chunk
+		consoleReadChannel <- &chunk
 	}
 }
 

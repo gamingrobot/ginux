@@ -64,7 +64,7 @@ func main() {
 	}
 	pprof.StartCPUProfile(f)
 	go func() {
-		time.Sleep(time.Minute * 30)
+		time.Sleep(time.Minute * 10)
 		pprof.StopCPUProfile()
 		log.Fatal("Done")
 	}()
@@ -74,7 +74,7 @@ func main() {
 		consoleToId: make(map[int64][]int64),
 		currentId:   0,
 	}
-	consoleReadChannel = make(chan ConsoleChunk)
+	consoleReadChannel = make(chan *ConsoleChunk)
 	go consoleDispatch()
 	vzcontrol := ConnectVZControl()
 	defer vzcontrol.Close()
