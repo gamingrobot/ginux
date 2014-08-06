@@ -230,7 +230,7 @@ func random(min, max int) int {
 
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
-		if _, ok consoleBuffers[chunk.Id]; !ok {
+		if _, ok := consoleBuffers[chunk.Id]; !ok {
 			 consoleBuffers[chunk.Id] = &bytes.Buffer{}
 		}
 		consoleBuffers[chunk.Id].Write(chunk.Data)
