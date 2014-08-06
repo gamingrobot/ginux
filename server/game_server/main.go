@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"bytes"
 	"time"
 	"runtime/pprof"
 )
@@ -38,7 +39,7 @@ type LockingWebsockets struct {
 	currentId   int64
 }
 
-var consoleBuffers map[int64]string
+var consoleBuffers map[int64]*bytes.Buffer
 
 var websockets *LockingWebsockets
 
@@ -68,7 +69,7 @@ func main() {
 		pprof.StopCPUProfile()
 		log.Fatal("Done")
 	}()
-	consoleBuffers = make(map[int64]string)
+	consoleBuffers = make(map[int64]*bytes.Buffer)
 	websockets = &LockingWebsockets{
 		byId:        make(map[int64]*websocket.Conn),
 		consoleToId: make(map[int64][]int64),
@@ -213,7 +214,7 @@ func main() {
 					//ws.WriteMessage(websocket.TextMessage, []byte(CLEAR))
 					ws.WriteMessage(websocket.TextMessage, []byte(RESET))
 					ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Selected Container %d\r\n", currentVm)))
-					ws.WriteMessage(websocket.TextMessage, []byte(consoleBuffers[currentVm]))
+					ws.WriteMessage(websocket.TextMessage, consoleBuffers[currentVm].Bytes())
 				}
 			}
 		}
@@ -229,7 +230,10 @@ func random(min, max int) int {
 
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
-		consoleBuffers[chunk.Id] += string(chunk.Data)
+		if _, ok consoleBuffers[chunk.Id]; !ok {
+			 consoleBuffers[chunk.Id] = &bytes.Buffer{}
+		}
+		consoleBuffers[chunk.Id].Write(chunk.Data)
 		//if len(consoleBuffers[chunk.Id]) > MAX_CONSOLE { 
 		//	consoleBuffers[chunk.Id] = consoleBuffers[chunk.Id][len(string(chunk.Data)):]
 		//}
