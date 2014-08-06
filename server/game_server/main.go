@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/go-martini/martini"
@@ -12,9 +13,8 @@ import (
 	"os"
 	"strconv"
 	"sync"
-	"bytes"
 	"time"
-	"runtime/pprof"
+	//"runtime/pprof"
 )
 
 const CLEAR string = "\033[H\033[2J"
@@ -59,7 +59,8 @@ func (c *LockingWebsockets) addWebsocket(ws *websocket.Conn) int64 {
 }
 
 func main() {
-	f, err := os.Create("pprof.out")
+	//pprof stuff
+	/*f, err := os.Create("pprof.out")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +69,7 @@ func main() {
 		time.Sleep(time.Minute * 10)
 		pprof.StopCPUProfile()
 		log.Fatal("Done")
-	}()
+	}()*/
 	consoleBuffers = make(map[int64]*bytes.Buffer)
 	websockets = &LockingWebsockets{
 		byId:        make(map[int64]*websocket.Conn),
@@ -231,10 +232,10 @@ func random(min, max int) int {
 func consoleDispatch() {
 	for chunk := range consoleReadChannel {
 		if _, ok := consoleBuffers[chunk.Id]; !ok {
-			 consoleBuffers[chunk.Id] = &bytes.Buffer{}
+			consoleBuffers[chunk.Id] = &bytes.Buffer{}
 		}
 		consoleBuffers[chunk.Id].Write(chunk.Data)
-		//if len(consoleBuffers[chunk.Id]) > MAX_CONSOLE { 
+		//if len(consoleBuffers[chunk.Id]) > MAX_CONSOLE {
 		//	consoleBuffers[chunk.Id] = consoleBuffers[chunk.Id][len(string(chunk.Data)):]
 		//}
 		websockets.RLock()
