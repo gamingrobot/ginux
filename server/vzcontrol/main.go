@@ -165,8 +165,8 @@ func (vz *VZControl) ContainerCreate(cid int64, reply *int64) error {
 	/*output, err = setupMount(cid)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Mount Error: %s\n Output:%s", err.Error(), output))
-	}
-	output, err = startContainer(cid)*/
+	}*/
+	output, err = startContainer(cid)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Start Error: %s\n Output:%s", err.Error(), output))
 	}
