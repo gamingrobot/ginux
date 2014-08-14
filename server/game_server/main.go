@@ -184,7 +184,7 @@ func main() {
 		defer ws.Close()
 		websocketId := websockets.addWebsocket(ws)
 		defer websockets.deleteWebsocket(websocketId)
-		ws.WriteMessage(websocket.TextMessage, []byte("Welcome to ginux!\r\n"))
+		ws.WriteMessage(websocket.TextMessage, []byte("Welcome to ginux!\r\nClick on a node to get started.\r\n"))
 		for {
 			_, message, err := ws.ReadMessage()
 			if err != nil {
