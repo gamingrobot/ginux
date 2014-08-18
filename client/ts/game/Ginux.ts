@@ -73,6 +73,7 @@ class Ginux {
         this._tickProvider.add(camControls.update, camControls);
         this._tickProvider.add(graph.update, graph)
         this._tickProvider.add(this.render, this, 0); //render as the last step
+        $('#loading').hide();
 
     }
 
