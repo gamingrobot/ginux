@@ -7,18 +7,17 @@ module.exports = function(grunt) {
         },
 
         typescript: {
-            options: {
-                basePath: 'ts',
-                comments: true,
-                module: 'amd',
-                target: 'es5',
-                sourceMap: true
-            },
-            amd: {
+            base: {
+                src: ['ts/**/*.ts'],
                 dest: 'js',
-                options: { module: 'amd' },
-                src: [ 'ts/**/*.ts' ]
-            },
+                options: {
+                    comments: true,
+                    basePath: 'ts',
+                    module: 'amd',
+                    target: 'es5',
+                    sourceMap: true
+                },
+            }
         },
         uglify: {
             js: {
@@ -32,7 +31,7 @@ module.exports = function(grunt) {
 
     require('load-grunt-tasks')(grunt);
 
-    grunt.registerTask('default', [ 'clean', 'typescript:amd' ]);
+    grunt.registerTask('default', [ 'clean', 'typescript' ]);
     grunt.registerTask('three', [ 'uglify:js' ]);
 
 };
