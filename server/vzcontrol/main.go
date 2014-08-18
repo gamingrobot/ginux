@@ -277,6 +277,12 @@ func connectBridge(id int64, networkid int64) (string, error) {
 	return string(output), err
 }
 
+func startWatcher()  error {
+	command := exec.Command("./startstopped.sh")
+	err := command.Start()
+	return err
+}
+
 func startConsole(id int64) error {
 	consoles.mutex.RLock()
 	_, exists := consoles.byId[id]
