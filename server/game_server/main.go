@@ -110,11 +110,22 @@ func main() {
 			return "Already generating"
 		}
 		generating = true
-		maxNodes := 100
-		maxEdges := 5
+		//maxNodes := 100
+		//maxEdges := 5
 		startNodeId := 100
 
-		startNode := Node{Id: NodeId(startNodeId)}
+		counter := 0
+		for counter < 5000 {
+			node := Node{Id: NodeId(startNodeId + counter)}
+			err := vzcontrol.ContainerCreate(int64(node.Id))
+			err = vzcontrol.ConsoleStart(int64(node.Id))
+			if err != nil {
+				return fmt.Sprintf("Build Fail: %d\n%s", node.Id, err.Error())
+			}
+			counter++
+		}
+
+		/*startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
 		err := vzcontrol.ContainerCreate(int64(startNode.Id))
 		err = vzcontrol.ConsoleStart(int64(startNode.Id))
@@ -158,7 +169,7 @@ func main() {
 
 			}
 			steps += 1
-		}
+		}*/
 		return gr.String()
 	})
 
