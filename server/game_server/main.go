@@ -7,6 +7,7 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/gorilla/websocket"
 	"github.com/martini-contrib/sessions"
+	"github.com/martini-contrib/gzip"
 	"log"
 	"math/rand"
 	"net/http"
@@ -89,6 +90,7 @@ func main() {
 	m := martini.Classic()
 	store := sessions.NewCookieStore([]byte(config.Secret))
 	m.Use(sessions.Sessions("session", store))
+	m.Use(gzip.All())
 
 	generating := false
 	gr := NewGraph()
