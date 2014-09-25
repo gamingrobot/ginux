@@ -112,11 +112,12 @@ func main() {
 		generating = true
 		//maxNodes := 100
 		//maxEdges := 5
-		startNodeId := 100
+		startNodeId := 1113
 
 		counter := 0
-		for counter < 5000 {
+		for counter < 500 {
 			node := Node{Id: NodeId(startNodeId + counter)}
+			gr.AddNode(node)
 			err := vzcontrol.ContainerCreate(int64(node.Id))
 			err = vzcontrol.ConsoleStart(int64(node.Id))
 			if err != nil {
