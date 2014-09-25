@@ -110,7 +110,7 @@ func main() {
 			return "Already generating"
 		}
 		generating = true
-		maxNodes := 100
+		maxNodes := 5
 		maxEdges := 5
 		startNodeId := 100
 
