@@ -162,10 +162,10 @@ func (vz *VZControl) ContainerCreate(cid int64, reply *int64) error {
 	if err != nil {
 		return errors.New(fmt.Sprintf("Create Error: %s\n Output:%s", err.Error(), output))
 	}
-	/*output, err = setupMount(cid)
+	output, err = setupMount(cid)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Mount Error: %s\n Output:%s", err.Error(), output))
-	}*/
+	}
 	output, err = startContainer(cid)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Start Error: %s\n Output:%s", err.Error(), output))
@@ -248,7 +248,7 @@ func createContainer(id int64) (string, error) {
 }
 
 func setupMount(id int64) (string, error) {
-	command := exec.Command("cp", "/etc/vz/conf/ginux.mount", fmt.Sprintf("/etc/vz/conf/%d.mount", id))
+	command := exec.Command("ln", "-s", "/etc/vz/conf/ginux.mount", fmt.Sprintf("/etc/vz/conf/%d.mount", id))
 	output, err := command.CombinedOutput()
 	return string(output), err
 }
