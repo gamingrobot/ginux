@@ -21,7 +21,8 @@ require.config({
         'detector': { exports: 'Detector' },
         'stats': { exports: 'Stats' },
         'term': { exports: 'Terminal' }
-    }
+    },
+    waitSeconds: 20
 });
 
 require(['main', 'three', 'jquery', 'lodash'], (main, THREE, $, _) => {
