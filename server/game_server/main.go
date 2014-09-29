@@ -44,6 +44,8 @@ var consoleBuffers map[int64]*bytes.Buffer
 
 var websockets *LockingWebsockets
 
+var generatingGraph bool
+
 func (c *LockingWebsockets) deleteWebsocket(id int64) {
 	c.Lock()
 	defer c.Unlock()
@@ -71,6 +73,7 @@ func main() {
 		pprof.StopCPUProfile()
 		log.Fatal("Done")
 	}()*/
+	generatingGraph = false
 	consoleBuffers = make(map[int64]*bytes.Buffer)
 	websockets = &LockingWebsockets{
 		byId:        make(map[int64]*websocket.Conn),
@@ -92,91 +95,22 @@ func main() {
 	m.Use(sessions.Sessions("session", store))
 	m.Use(gzip.All())
 
-	generating := false
 	gr := NewGraph()
 	m.Get("/reset/:secret", func(w http.ResponseWriter, r *http.Request, params martini.Params, session sessions.Session) string {
 		if params["secret"] != config.Secret {
 			return ""
 		}
+		generatingGraph = false
 		err := vzcontrol.Reset()
 		if err != nil {
 			return err.Error()
 		}
-		generating = false
 		gr = NewGraph()
 		return "Done"
 	})
 
 	m.Get("/gen", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
-		if generating {
-			return "Already generating"
-		}
-		generating = true
-		//maxNodes := 100
-		//maxEdges := 5
-		startNodeId := 2000
-
-		counter := 0
-		for counter < 1000 {
-			node := Node{Id: NodeId(startNodeId + counter)}
-			gr.AddNode(node)
-			err := vzcontrol.ContainerCreate(int64(node.Id))
-			if err != nil {
-				return fmt.Sprintf("Create Fail: %d\n%s", node.Id, err.Error())
-			}
-			err = vzcontrol.ConsoleStart(int64(node.Id))
-			if err != nil {
-				return fmt.Sprintf("Start Fail: %d\n%s", node.Id, err.Error())
-			}
-			counter++
-		}
-
-		/*startNode := Node{Id: NodeId(startNodeId)}
-		gr.AddNode(startNode)
-		err := vzcontrol.ContainerCreate(int64(startNode.Id))
-		err = vzcontrol.ConsoleStart(int64(startNode.Id))
-
-		nodes := make([]Node, 0)
-		nodes = append(nodes, startNode)
-
-		steps := 1
-		for len(nodes) != 0 && steps < maxNodes {
-			node, nodes := nodes[len(nodes)-1], nodes[:len(nodes)-1]
-
-			numEdges := random(1, maxEdges)
-			for i := 1; i <= numEdges; i++ {
-				targetNode := Node{Id: NodeId(i*steps + startNodeId)}
-				if gr.AddNode(targetNode) {
-					err = vzcontrol.ContainerCreate(int64(targetNode.Id))
-					if err != nil {
-						return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
-					}
-					err = vzcontrol.ConsoleStart(int64(targetNode.Id))
-					if err != nil {
-						return fmt.Sprintf("Console Start: %d\n%s", targetNode.Id, err.Error())
-					}
-					nodes = append(nodes, targetNode)
-					edgeid := int64(i * steps)
-					if gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id}) {
-						err = vzcontrol.NetworkCreate(edgeid)
-						if err != nil {
-							return fmt.Sprintf("Network Create: %d\n%s", edgeid, err.Error())
-						}
-						err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
-						if err != nil {
-							return fmt.Sprintf("Network Add Node: %d, %d\n%s", node.Id, edgeid, err.Error())
-						}
-						err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
-						if err != nil {
-							return fmt.Sprintf("Network Add Target: %d, %d\n%s", targetNode.Id, edgeid, err.Error())
-						}
-					}
-				}
-
-			}
-			steps += 1
-		}*/
-		return gr.String()
+		return generateGraph(100, vzcontrol, gr)
 	})
 
 	m.Get("/graph", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
@@ -239,6 +173,82 @@ func main() {
 	})
 	log.Println("Game Server started on", config.Address)
 	log.Fatal(http.ListenAndServe(config.Address, m))
+}
+
+func generateGraph(nodes int, vzcontrol *VZControl, gr *Graph) string{
+		if generatingGraph {
+			return "Already generating"
+		}
+		generatingGraph = true
+		//maxNodes := 100
+		//maxEdges := 5
+		startNodeId := 3001
+
+		counter := 0
+		for counter < nodes {
+			if generatingGraph == false {
+				return "Generation Aborted"
+			}
+			node := Node{Id: NodeId(startNodeId + counter)}
+			gr.AddNode(node)
+			err := vzcontrol.ContainerCreate(int64(node.Id))
+			if err != nil {
+				return fmt.Sprintf("Create Fail: %d\n%s", node.Id, err.Error())
+			}
+			err = vzcontrol.ConsoleStart(int64(node.Id))
+			if err != nil {
+				return fmt.Sprintf("Start Fail: %d\n%s", node.Id, err.Error())
+			}
+			counter++
+		}
+		return gr.String()
+
+		/*startNode := Node{Id: NodeId(startNodeId)}
+		gr.AddNode(startNode)
+		err := vzcontrol.ContainerCreate(int64(startNode.Id))
+		err = vzcontrol.ConsoleStart(int64(startNode.Id))
+
+		nodes := make([]Node, 0)
+		nodes = append(nodes, startNode)
+
+		steps := 1
+		for len(nodes) != 0 && steps < maxNodes {
+			node, nodes := nodes[len(nodes)-1], nodes[:len(nodes)-1]
+
+			numEdges := random(1, maxEdges)
+			for i := 1; i <= numEdges; i++ {
+				targetNode := Node{Id: NodeId(i*steps + startNodeId)}
+				if gr.AddNode(targetNode) {
+					err = vzcontrol.ContainerCreate(int64(targetNode.Id))
+					if err != nil {
+						return fmt.Sprintf("Container Create: %d, %d, %d\n%s", targetNode.Id, i*steps, numEdges, err.Error())
+					}
+					err = vzcontrol.ConsoleStart(int64(targetNode.Id))
+					if err != nil {
+						return fmt.Sprintf("Console Start: %d\n%s", targetNode.Id, err.Error())
+					}
+					nodes = append(nodes, targetNode)
+					edgeid := int64(i * steps)
+					if gr.AddEdge(Edge{Id: EdgeId(edgeid), Head: node.Id, Tail: targetNode.Id}) {
+						err = vzcontrol.NetworkCreate(edgeid)
+						if err != nil {
+							return fmt.Sprintf("Network Create: %d\n%s", edgeid, err.Error())
+						}
+						err = vzcontrol.NetworkAdd(int64(node.Id), edgeid)
+						if err != nil {
+							return fmt.Sprintf("Network Add Node: %d, %d\n%s", node.Id, edgeid, err.Error())
+						}
+						err = vzcontrol.NetworkAdd(int64(targetNode.Id), edgeid)
+						if err != nil {
+							return fmt.Sprintf("Network Add Target: %d, %d\n%s", targetNode.Id, edgeid, err.Error())
+						}
+					}
+				}
+
+			}
+			steps += 1
+		}*/
+
 }
 
 func random(min, max int) int {
