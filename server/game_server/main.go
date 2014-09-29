@@ -45,6 +45,7 @@ var consoleBuffers map[int64]*bytes.Buffer
 var websockets *LockingWebsockets
 
 var generatingGraph bool
+var generatingError string
 
 func (c *LockingWebsockets) deleteWebsocket(id int64) {
 	c.Lock()
@@ -74,6 +75,7 @@ func main() {
 		log.Fatal("Done")
 	}()*/
 	generatingGraph = false
+	generatingError = ""
 	consoleBuffers = make(map[int64]*bytes.Buffer)
 	websockets = &LockingWebsockets{
 		byId:        make(map[int64]*websocket.Conn),
@@ -96,6 +98,7 @@ func main() {
 	m.Use(gzip.All())
 
 	gr := NewGraph()
+	go generateGraph(100, vzcontrol, gr)
 	m.Get("/reset/:secret", func(w http.ResponseWriter, r *http.Request, params martini.Params, session sessions.Session) string {
 		if params["secret"] != config.Secret {
 			return ""
@@ -110,7 +113,13 @@ func main() {
 	})
 
 	m.Get("/gen", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
-		return generateGraph(100, vzcontrol, gr)
+		if generatingError != "" {
+			return fmt.Sprintf("Generation Error: ", generatingError)
+		}
+		if generatingGraph {
+			return fmt.Sprintf("Generating: ", len(gr.Nodes))
+		}
+		return "Done"
 	})
 
 	m.Get("/graph", func(w http.ResponseWriter, r *http.Request, session sessions.Session) string {
@@ -175,33 +184,33 @@ func main() {
 	log.Fatal(http.ListenAndServe(config.Address, m))
 }
 
-func generateGraph(nodes int, vzcontrol *VZControl, gr *Graph) string{
+func generateGraph(nodes int, vzcontrol *VZControl, gr *Graph){
 		if generatingGraph {
-			return "Already generating"
+			return
 		}
 		generatingGraph = true
 		//maxNodes := 100
 		//maxEdges := 5
-		startNodeId := 3001
+		startNodeId := 3101
 
 		counter := 0
 		for counter < nodes {
 			if generatingGraph == false {
-				return "Generation Aborted"
+				generatingError = "Generation Aborted"
+				return
 			}
 			node := Node{Id: NodeId(startNodeId + counter)}
 			gr.AddNode(node)
 			err := vzcontrol.ContainerCreate(int64(node.Id))
 			if err != nil {
-				return fmt.Sprintf("Create Fail: %d\n%s", node.Id, err.Error())
+				generatingError = fmt.Sprintf("Create Fail: %d\n%s", node.Id, err.Error())
 			}
 			err = vzcontrol.ConsoleStart(int64(node.Id))
 			if err != nil {
-				return fmt.Sprintf("Start Fail: %d\n%s", node.Id, err.Error())
+				generatingError = fmt.Sprintf("Start Fail: %d\n%s", node.Id, err.Error())
 			}
 			counter++
 		}
-		return gr.String()
 
 		/*startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
