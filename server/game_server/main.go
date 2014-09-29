@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"io/ioutil"
 	//"runtime/pprof"
 )
 
@@ -98,7 +99,12 @@ func main() {
 	m.Use(gzip.All())
 
 	gr := NewGraph()
-	go generateGraph(100, vzcontrol, gr)
+	if _, err := os.Stat("graph.json"); err == nil { //file exists
+		file, _ := ioutil.ReadFile("graph.json")
+    	json.Unmarshal(file, &gr)
+    } else {
+		go generateGraph(100, vzcontrol, gr)
+	}
 	m.Get("/reset/:secret", func(w http.ResponseWriter, r *http.Request, params martini.Params, session sessions.Session) string {
 		if params["secret"] != config.Secret {
 			return ""
@@ -109,6 +115,7 @@ func main() {
 			return err.Error()
 		}
 		gr = NewGraph()
+		os.Remove("graph.json")
 		return "Done"
 	})
 
@@ -191,7 +198,7 @@ func generateGraph(nodes int, vzcontrol *VZControl, gr *Graph){
 		generatingGraph = true
 		//maxNodes := 100
 		//maxEdges := 5
-		startNodeId := 3101
+		startNodeId := 101
 
 		counter := 0
 		for counter < nodes {
@@ -211,6 +218,7 @@ func generateGraph(nodes int, vzcontrol *VZControl, gr *Graph){
 			}
 			counter++
 		}
+		generatingGraph = false
 
 		/*startNode := Node{Id: NodeId(startNodeId)}
 		gr.AddNode(startNode)
