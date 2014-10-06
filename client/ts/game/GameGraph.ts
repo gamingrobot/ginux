@@ -33,14 +33,16 @@ class GameGraph {
 
     private _onselected = (obj) => {
         if(obj != null) {
-            console.log("Selected:", obj.id)
+            console.log("Selected:", obj.userData)
         }
     }
 
     private _onclicked = (obj) => {
         if(obj != null) {
-            console.log("Clicked:", obj.id)
-            this._websocket.send(this._websocket.types.Click, obj.id)
+            console.log("Clicked:", obj.userData)
+            if(obj.userData != nil){
+                this._websocket.send(this._websocket.types.Click, obj.userData)
+            }
         }  
     }
 
@@ -73,7 +75,7 @@ class GameGraph {
         draw_object.position.y = Math.floor(Math.random() * (area + area + 1) - area);
         draw_object.position.z = Math.floor(Math.random() * (area + area + 1) - area);
 
-        draw_object.id = node.id;
+        draw_object.userData = node.id;
         node.draw_object = draw_object;
         node.position = draw_object.position;
         this._render.scene.add( node.draw_object );
