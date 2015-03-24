@@ -5,7 +5,8 @@ A research project about scaling networked Linux virtual machines. It uses OpenV
 
 ![OrigImage](/ginux.png "Optional title")
 
-[Startup Statistics](https://docs.google.com/spreadsheets/d/1kbbzriJ8zWfKirw1wTIbQ201OQKbn20PG9gNo9NjkJo/edit?usp=sharing)
+Startup Statistics
 ======
+[Google Spreadsheet](https://docs.google.com/spreadsheets/d/1kbbzriJ8zWfKirw1wTIbQ201OQKbn20PG9gNo9NjkJo/edit?usp=sharing)
 ![OrigImage](/stats.png "Optional title")
 
